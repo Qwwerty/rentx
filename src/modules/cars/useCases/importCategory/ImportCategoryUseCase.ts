@@ -42,11 +42,11 @@ class ImportCategoryUseCase {
 
       const existCategory = this.categoriesRepository.findByName(name);
 
-      if(!existCategory) {
+      if (!existCategory) {
         this.categoriesRepository.create({
           name,
-          description
-        })
+          description,
+        });
       }
     });
   }
