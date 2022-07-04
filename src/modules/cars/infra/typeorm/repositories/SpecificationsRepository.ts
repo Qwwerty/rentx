@@ -5,7 +5,7 @@ import {
   ISpecificationsRepostiory,
 } from "@modules/cars/repositories/ISpecificationsRepository";
 
-import { Specification } from "../../../entities/Specification";
+import { Specification } from "../entities/Specification";
 
 class SpecificationsRepository implements ISpecificationsRepostiory {
   private repository: Repository<Specification>;
