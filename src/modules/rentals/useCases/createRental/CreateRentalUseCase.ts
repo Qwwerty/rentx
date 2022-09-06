@@ -1,8 +1,10 @@
+import { inject, injectable } from "tsyringe";
+
 import { Rental } from "@modules/rentals/infra/typeorm/entities/Rental";
 import { IRentalsRepository } from "@modules/rentals/repositories/IRentalsRepository";
 import { IDateProvider } from "@shared/container/providers/DateProvider/IDateProvider";
 import { AppError } from "@shared/infra/errors/AppError";
-import dayjs from "dayjs";
+import { ICarsRepository } from "@modules/cars/repositories/ICarsRepository";
 
 interface IRequest {
   user_id: string;
@@ -10,10 +12,15 @@ interface IRequest {
   expected_return_date: Date;
 }
 
+@injectable()
 class CreateRentalUseCase {
   constructor(
+    @inject("RentalsRepository")
     private rentalsRepository: IRentalsRepository,
-    private dateProvider: IDateProvider
+    @inject("DayjsDateProvider")
+    private dateProvider: IDateProvider,
+    @inject("CarsRepository")
+    private carsRepository: ICarsRepository
   ) {}
 
   async execute({
@@ -35,6 +42,10 @@ class CreateRentalUseCase {
       user_id
     );
 
+    if (rentalOpenToUser) {
+      throw new AppError("There's a rental in progress for user");
+    }
+
     const dateNow = this.dateProvider.dateNow();
 
     const compare = this.dateProvider.compareInHours(
@@ -51,6 +62,8 @@ class CreateRentalUseCase {
       car_id,
       expected_return_date,
     });
+
+    await this.carsRepository.updateAvailable(car_id, false);
 
     return rental;
   }
